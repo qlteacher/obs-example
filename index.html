@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Hello World!</title>
+    <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <style>
+      #preview {
+        margin-top: 2rem;
+      }
+      .performanceStatistics {
+        margin-top: 2rem;
+        margin-bottom: 3rem;
+        border-collapse: collapse;
+      }
+      .performanceStatistics tr,td {
+        border-bottom: 1px solid rgb(165, 165, 165);
+        border-top: 1px solid rgb(165, 165, 165);
+        padding: .5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <input id="rtmp_server" value="rtmp://js.live-send.acg.tv/live-js/" />
+
+    <input id="rtmp_key">
+
+    <select id="OBSSettingsCategories">
+      <option value="General">General</option>
+      <option value="Stream">Stream</option>
+      <option value="Output">Output</option>
+      <option value="Audio">Audio</option>
+      <option value="Video">Video</option>
+      <option value="Hotkeys">Hotkeys</option>
+      <option value="Advanced">Advanced</option>
+    </select>
+
+    <button id="showSetting-button" onclick="getSetting()">
+      控制台显示配置
+    </button>
+
+    <button id="rec-button" onclick="switchRecording()">
+      ⏳ 初始化中,请稍后...
+    </button>
+
+    <span id="rec-timer">0:00:00.0</span>
+
+    <button title="录制文件目录" onclick="openFolder()">📂</button>
+
+    <div id="preview">
+      初始化中...
+    </div>
+
+    <table class="performanceStatistics">
+      <tr>
+        <td>CPU</td>
+        <td>
+          <meter id="cpuMeter" value="0" min="0" optimum="50" low="65" high="80" max="100"></meter>
+          <span id="cpu">加载中...</span>
+        </td>
+      </tr>
+      <tr>
+        <td>丢帧</td>
+        <td id="numberDroppedFrames">加载中...</td>
+      </tr>
+      <tr>
+        <td>丢帧</td>
+        <td id="percentageDroppedFrames">加载中...</td>
+      </tr>
+      <tr>
+        <td>带宽</td>
+        <td id="bandwidth">加载中...</td>
+      </tr>
+      <tr>
+        <td>帧率</td>
+        <td id="frameRate">加载中...</td>
+      </tr>
+    </table>
+
+    <pre>
+    node版本 <script>document.write(process.versions.node)</script>,
+    Chrome版本 <script>document.write(process.versions.chrome)</script>,
+    Electron版本 <script>document.write(process.versions.electron)</script>.
+    </pre>
+
+    <script src="./renderer.js"></script>
+  </body>
+</html>
