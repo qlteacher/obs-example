@@ -34,6 +34,18 @@ function createWindow () {
     }
   });
 
+  ipcMain.on('showSourceInfo', (event, bounds) => {
+    event.returnValue = obsRecorder.showSourceInfo(bounds);
+  });
+
+  ipcMain.on('getAllScene', (event) => {
+    event.returnValue = obsRecorder.getAllScene();
+  });
+
+  ipcMain.on('getALlCameras', (event) => {
+    event.returnValue = obsRecorder.getALlCameras();
+  });
+
   ipcMain.on('getSetting', (event, bounds) => {
     event.returnValue = obsRecorder.getSetting(bounds);
   });

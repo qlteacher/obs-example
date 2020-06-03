@@ -40,7 +40,7 @@ function initialize(win) {
 }
 
 function getSetting(cate) {
-  console.log(electron.screen.getAllDisplays())
+  // console.log(electron.screen.getAllDisplays())
   return osn.NodeObs.OBS_settings_getSettings(cate.name).data;
 }
 
@@ -89,24 +89,38 @@ function configureOBS() {
   console.debug('配置obs完成');
 }
 
+function showSourceInfo(name) {
+  return scene.getItems().filter(item => {
+    return name.id == item.source.name
+  }).map(item => {
+      let r = {name:item.source.name,width:item.source.width,height:item.source.height,x:item.position.x,y:item.position.y,visible:item.visible};
+      console.log(r)
+      return r;
+  })
+}
+
+function getAllScene() {
+  // 遍历 osn.Global.getOutputSource() 根据type判断 ESourceType === 3
+  //console.log(scene)
+  //console.log(scene.name)
+  return new Array({name:scene.name,items:scene.getItems().map(function (item) {
+      return item.source.name;
+    })});
+  // return new Array(scene);
+}
+
 function selectDisPlay(index) {
-
-  console.log("#################################")
-
   const scene = osn.SceneFactory.fromName('test-scene');
-  console.log(scene.getItems().length)
+  //console.log(scene.getItems().length)
 
   scene.getItems().map(item => {
-    console.log(item)
-    item.moveDown();
-    //删除不好使哇
-    //item.remove();
+    //console.log(item.source.name)
+    // 删除
+    if('desktop-video' === item.source.name){
+      osn.InputFactory.fromName(item.source.name).release()
+      item.remove();
+    }
   })
-
-  //id ?
-  //const olditem = scene.findItem('monitor_capture');
-  //const olditem = scene.getItemAtIdx(0)
-  //olditem.remove();
 
   const videoSource = osn.InputFactory.create('monitor_capture', 'desktop-video');
   const { physicalWidth, physicalHeight, aspectRatio } = displayInfo(index.id);
@@ -114,8 +128,7 @@ function selectDisPlay(index) {
   let settings = videoSource.settings;
 
   // 这个参数修改使用哪个显示器,从0开始
-  console.log("index="+index.id)
-  settings['monitor'] = index.id
+  settings['monitor'] = parseInt(index.id)
   settings['width'] = physicalWidth;
   settings['height'] = physicalHeight;
   videoSource.update(settings);
@@ -128,10 +141,10 @@ function selectDisPlay(index) {
   setSetting('Video', 'Base', `${outputWidth}x${outputHeight}`);
   setSetting('Video', 'Output', `${outputWidth}x${outputHeight}`);
   newitem.scale = { x: 1.0/ videoScaleFactor, y: 1.0 / videoScaleFactor };
-  newitem.moveTop()
+  newitem.moveBottom()
 
   scene.save()
-  return newitem;
+  return scene;
 }
 
 function displayInfo(index) {
@@ -147,6 +160,19 @@ function displayInfo(index) {
     physicalWidth:  width * scaleFactor,
     physicalHeight: height * scaleFactor,
   }
+}
+
+function getALlCameras() {
+  const dummyInput = osn.InputFactory.create('dshow_input', 'video', {
+    audio_device_id: 'does_not_exist',
+    video_device_id: 'does_not_exist',
+  });
+
+  const cameraItems = dummyInput.properties.get('video_device_id').details.items;
+
+  dummyInput.release();
+
+  return cameraItems;
 }
 
 function getCameraSource() {
@@ -171,7 +197,7 @@ function getCameraSource() {
   cameraItems[0].selected = true;
   console.debug('cameraItems[0].name: ' + cameraItems[0].name);
 
-  const obsCameraInput = osn.InputFactory.create('dshow_input', 'video', {
+  const obsCameraInput = osn.InputFactory.create('dshow_input', 'dshow_input', {
     video_device_id: deviceId,
   });
 
@@ -413,3 +439,6 @@ module.exports.setupPreview = setupPreview;
 module.exports.resizePreview = resizePreview;
 module.exports.getSetting = getSetting;
 module.exports.selectDisPlay = selectDisPlay;
+module.exports.getALlCameras = getALlCameras;
+module.exports.getAllScene = getAllScene;
+module.exports.showSourceInfo = showSourceInfo;

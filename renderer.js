@@ -32,12 +32,16 @@ function getSetting() {
   console.log(result)
 }
 
-function displaySelect() {
-  const select = document.getElementById('displaySelect')
-  console.log(select.options[select.selectedIndex].value)
-
-  ///const result = ipcRenderer.sendSync('selectDisPlay',{id:select.options[select.selectedIndex].value});
+function cameraSelectChange() {
+  const select = document.getElementById('cameraSelect')
+  //const result = ipcRenderer.sendSync('cameraSelect',{id:select.options[select.selectedIndex].value});
   //console.log(result)
+}
+
+function displaySelectChange() {
+  const select = document.getElementById('displaySelect')
+  const result = ipcRenderer.sendSync('selectDisPlay',{id:select.options[select.selectedIndex].value});
+  console.log(result)
 }
 
 function switchRecording() {
@@ -84,17 +88,43 @@ function updateUI() {
   })
 
 
-  const select = document.getElementById('displaySelect')
+  const displaySelect = document.getElementById('displaySelect')
   remote.screen.getAllDisplays().forEach(function (dispaly,index){
-    select.options.add(new Option(dispaly.size.height+"*"+dispaly.size.width,index));
+    displaySelect.options.add(new Option(dispaly.size.height+"*"+dispaly.size.width,index));
   })
 
   //设置主显示器
-  //remote.screen.getPrimaryDisplay();
-  select.selectedIndex = 0;
-  //艹
-  displaySelect()
-  //result[1].parameters[""0""].currentValue
+  displaySelect.selectedIndex = 0;
+  displaySelectChange()
+
+  const cameras = ipcRenderer.sendSync('getALlCameras');
+  const cameraSelect = document.getElementById('cameraSelect')
+  cameras.forEach(function (camera){
+    cameraSelect.options.add(new Option(camera.name,camera.value));
+  })
+
+  const allScene = ipcRenderer.sendSync('getAllScene');
+  console.log(allScene)
+
+  const sceneSelect = document.getElementById('sceneSelect')
+  allScene.forEach(function (scene){
+    sceneSelect.options.add(new Option(scene.name,scene.name));
+  })
+  sceneSelect.selectedIndex = 0;
+
+  const sourceSelect = document.getElementById('sourceSelect')
+  if(allScene.length == 1){
+    allScene[0].items.forEach(function (item){
+      sourceSelect.options.add(new Option(item,item));
+    })
+  }
+}
+
+function showSourceInfo() {
+  const sourceSelect = document.getElementById('sourceSelect')
+  const result = ipcRenderer.sendSync('showSourceInfo',{id:sourceSelect.options[sourceSelect.selectedIndex].value});
+  console.log(result)
+  document.getElementById('response').innerHTML = JSON.stringify(result)
 }
 
 function startTimer() {

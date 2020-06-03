@@ -22,17 +22,29 @@
     </style>
   </head>
   <body>
-    切换显示器:
-    <select id="displaySelect" onchange="displaySelect()">
+    选择显示器:
+    <select id="displaySelect" onchange="displaySelectChange()">
     </select>
     <br/>
-
+    选择色相头:
+    <select id="cameraSelect" onchange="cameraSelectChange()">
+      <option value="">无</option>
+    </select>
+    <br/>
+--------------------------------------------------------------
+    <br/>
     rtmp_server:
     <input id="rtmp_server" value="rtmp://js.live-send.acg.tv/live-js/" />
     rtmp_key:
     <input id="rtmp_key">
-    <br/>
 
+    <button id="savertmp" onclick="">
+        保存配置
+    </button>
+    <br/>
+-------------------------------------------------------------
+    <br/>
+    setting分类:
     <select id="OBSSettingsCategories">
       <option value="General">General</option>
       <option value="Stream">Stream</option>
@@ -44,8 +56,28 @@
     </select>
 
     <button id="showSetting-button" onclick="getSetting()">
-      控制台显示配置
+      控制台显示
     </button>
+    <br/>
+    -------------------------------------------------------------
+    <br/>
+
+    <label>场景(scene):
+        <select id="sceneSelect" multiple size="5">
+
+        </select>
+    </label>
+
+    <label>源(source):
+        <select onchange="showSourceInfo()" id="sourceSelect" multiple size="5">
+
+        </select>
+    </label>
+
+    <pre id="response"></pre>
+
+    <br/>
+    -------------------------------------------------------------
     <br/>
 
     <button id="rec-button" onclick="switchRecording()">
