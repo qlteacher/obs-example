@@ -22,9 +22,16 @@
     </style>
   </head>
   <body>
-    <input id="rtmp_server" value="rtmp://js.live-send.acg.tv/live-js/" />
+    切换显示器:
+    <select id="displaySelect" onchange="displaySelect()">
+    </select>
+    <br/>
 
+    rtmp_server:
+    <input id="rtmp_server" value="rtmp://js.live-send.acg.tv/live-js/" />
+    rtmp_key:
     <input id="rtmp_key">
+    <br/>
 
     <select id="OBSSettingsCategories">
       <option value="General">General</option>
@@ -39,6 +46,7 @@
     <button id="showSetting-button" onclick="getSetting()">
       控制台显示配置
     </button>
+    <br/>
 
     <button id="rec-button" onclick="switchRecording()">
       ⏳ 初始化中,请稍后...

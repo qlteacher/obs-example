@@ -4,6 +4,7 @@ const { first } = require('rxjs/operators');
 
 const osn = require("obs-studio-node");
 const { BrowserWindow } = require('electron');
+const electron = require('electron');
 
 let obsInitialized = false;
 let scene = null;
@@ -39,7 +40,7 @@ function initialize(win) {
 }
 
 function getSetting(cate) {
-  console.log(cate)
+  console.log(electron.screen.getAllDisplays())
   return osn.NodeObs.OBS_settings_getSettings(cate.name).data;
 }
 
@@ -49,7 +50,7 @@ function initOBS() {
   osn.NodeObs.SetWorkingDirectory(path.join(__dirname, 'node_modules', 'obs-studio-node'));
 
   const obsDataPath = path.join(__dirname, 'osn-data'); // OBS Studio configs and logs
-  console.log(obsDataPath)
+
   // Arguments: locale, path to directory where configuration and logs will be stored, your application version
   const initResult = osn.NodeObs.OBS_API_initAPI('en-US', obsDataPath, '1.0.0');
 
@@ -88,10 +89,54 @@ function configureOBS() {
   console.debug('配置obs完成');
 }
 
-// Get information about prinary display
-function displayInfo() {
+function selectDisPlay(index) {
+
+  console.log("#################################")
+
+  const scene = osn.SceneFactory.fromName('test-scene');
+  console.log(scene.getItems().length)
+
+  scene.getItems().map(item => {
+    console.log(item)
+    item.moveDown();
+    //删除不好使哇
+    //item.remove();
+  })
+
+  //id ?
+  //const olditem = scene.findItem('monitor_capture');
+  //const olditem = scene.getItemAtIdx(0)
+  //olditem.remove();
+
+  const videoSource = osn.InputFactory.create('monitor_capture', 'desktop-video');
+  const { physicalWidth, physicalHeight, aspectRatio } = displayInfo(index.id);
+  // Update source settings:
+  let settings = videoSource.settings;
+
+  // 这个参数修改使用哪个显示器,从0开始
+  console.log("index="+index.id)
+  settings['monitor'] = index.id
+  settings['width'] = physicalWidth;
+  settings['height'] = physicalHeight;
+  videoSource.update(settings);
+  videoSource.save();
+
+  const newitem = scene.add(videoSource);
+  const outputWidth = 1920;
+  const videoScaleFactor = physicalWidth / outputWidth;
+  const outputHeight = Math.round(outputWidth / aspectRatio);
+  setSetting('Video', 'Base', `${outputWidth}x${outputHeight}`);
+  setSetting('Video', 'Output', `${outputWidth}x${outputHeight}`);
+  newitem.scale = { x: 1.0/ videoScaleFactor, y: 1.0 / videoScaleFactor };
+  newitem.moveTop()
+
+  scene.save()
+  return newitem;
+}
+
+function displayInfo(index) {
   const { screen } = require('electron');
-  const primaryDisplay = screen.getPrimaryDisplay();
+  const primaryDisplay = index?screen.getAllDisplays()[index]:screen.getPrimaryDisplay();
   const { width, height } = primaryDisplay.size;
   const { scaleFactor } = primaryDisplay;
   return {
@@ -141,18 +186,18 @@ function getCameraSource() {
     }
   }
 
-  if (obsCameraInput.width === 0) {
+  /*if (obsCameraInput.width === 0) {
     console.debug(`Found camera "${cameraItems[0].name}" doesn't seem to work as its reported width is still zero.`);
     return null;
-  }
+  }*/
 
   // 必要时更新配置:
-  // let settings = obsCameraInput.settings;
-  // console.debug('Camera settings:', obsCameraInput.settings);
-  // settings['width'] = 320;
-  // settings['height'] = 240;
-  // obsCameraInput.update(settings);
-  // obsCameraInput.save();
+  let settings = obsCameraInput.settings;
+  console.debug('Camera settings:', obsCameraInput.settings);
+  settings['width'] = 320;
+  settings['height'] = 240;
+  obsCameraInput.update(settings);
+  obsCameraInput.save();
 
   return obsCameraInput;
 }
@@ -165,10 +210,8 @@ function setupScene() {
   // Update source settings:
   let settings = videoSource.settings;
 
-  console.log(settings)
-
   // 这个参数修改使用哪个显示器,从0开始
-  // settings['monitor'] = 1
+  settings['monitor'] = 1
   settings['width'] = physicalWidth;
   settings['height'] = physicalHeight;
   videoSource.update(settings);
@@ -196,8 +239,8 @@ function setupScene() {
       x: outputWidth - cameraSource.width * cameraScaleFactor - outputWidth / 10,
       y: outputHeight - cameraSource.height * cameraScaleFactor - outputHeight / 10,
     };
+    cameraItem.moveTop();
   }
-
   return scene;
 }
 
@@ -267,7 +310,7 @@ async function stop() {
 
   console.debug('Stopping recording...');
   osn.NodeObs.OBS_service_stopRecording();
-  osn.NodeObs.OBS_service_stopStreaming();
+  osn.NodeObs.OBS_service_stopStreaming(false);
   console.debug('Stopped?');
 
   signalInfo = await getNextSignalInfo();
@@ -369,3 +412,4 @@ module.exports.shutdown = shutdown;
 module.exports.setupPreview = setupPreview;
 module.exports.resizePreview = resizePreview;
 module.exports.getSetting = getSetting;
+module.exports.selectDisPlay = selectDisPlay;

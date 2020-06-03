@@ -5,7 +5,6 @@ function initOBS() {
   // Replace with await ipcRenderer.invoke when obs-studio-node will be ready to work on recent versions of Electron.
   // See https://github.com/stream-labs/obs-studio-node/issues/605
   const result = ipcRenderer.sendSync('recording-init');
-  console.debug("初始化obs result:", result);
   if (result) {
     ipcRenderer.on("performanceStatistics", (_event, data) => onPerformanceStatistics(data));
   }
@@ -31,6 +30,14 @@ function getSetting() {
   const cate = document.getElementById('OBSSettingsCategories')
   const result = ipcRenderer.sendSync('getSetting',{name:cate.options[cate.selectedIndex].text});
   console.log(result)
+}
+
+function displaySelect() {
+  const select = document.getElementById('displaySelect')
+  console.log(select.options[select.selectedIndex].value)
+
+  ///const result = ipcRenderer.sendSync('selectDisPlay',{id:select.options[select.selectedIndex].value});
+  //console.log(result)
 }
 
 function switchRecording() {
@@ -76,9 +83,18 @@ function updateUI() {
     })
   })
 
-  //result[1].parameters[""0""].currentValue
-  console.log(streamSettings)
 
+  const select = document.getElementById('displaySelect')
+  remote.screen.getAllDisplays().forEach(function (dispaly,index){
+    select.options.add(new Option(dispaly.size.height+"*"+dispaly.size.width,index));
+  })
+
+  //设置主显示器
+  //remote.screen.getPrimaryDisplay();
+  select.selectedIndex = 0;
+  //艹
+  displaySelect()
+  //result[1].parameters[""0""].currentValue
 }
 
 function startTimer() {

@@ -38,6 +38,10 @@ function createWindow () {
     event.returnValue = obsRecorder.getSetting(bounds);
   });
 
+  ipcMain.on('selectDisPlay', (event, bounds) => {
+    event.returnValue = obsRecorder.selectDisPlay(bounds);
+  });
+
   ipcMain.on('recording-init', (event) => {
     obsRecorder.initialize(win);
     event.returnValue = true;
