@@ -1,3 +1,11 @@
+
+#
+只依赖Electron和OBS-node的简单例子
+
+##
+
+![预览](review.png)
+
 ## 安装
 
 ```
